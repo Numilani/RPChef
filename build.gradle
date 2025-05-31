@@ -1,0 +1,81 @@
+plugins{
+    id 'java'
+    id 'io.github.goooler.shadow' version '8.1.7'
+}
+
+group = 'me.numilani'
+version = '0.1.0'
+
+repositories {
+    mavenCentral()
+    maven {
+        name = "spigotmc-repo"
+        url = "https://hub.spigotmc.org/nexus/content/repositories/snapshots/"
+    }
+    maven {
+        name = "sonatype"
+        url = "https://oss.sonatype.org/content/groups/public/"
+    }
+    maven {
+        url = 'https://ci.mg-dev.eu/plugin/repository/everything'
+    }
+    maven {
+        url = 'https://repo.rpkit.com/repository/maven-releases/'
+    }
+    maven {
+        url = 'https://repo.codemc.org/repository/maven-public'
+    }
+    maven {
+        url = 'https://jitpack.io'
+      }
+  maven {
+    url = 'https://repo.minebench.de/'
+  }
+}
+
+dependencies {
+    compileOnly 'com.github.MilkBowl:VaultAPI:1.7'
+    compileOnly "org.spigotmc:spigot-api:1.21.1-R0.1-SNAPSHOT"
+    compileOnly 'org.xerial:sqlite-jdbc:3.40.1.0'
+    compileOnly 'com.bergerkiller.bukkit:BKCommonLib:1.21.1-v2-SNAPSHOT'
+    compileOnly 'com.bergerkiller.bukkit.regionchangetracker:BKCommonLib-RegionChangeTracker-Core:1.2'
+    compileOnly 'org.incendo:cloud-paper:2.0.0-beta.8'
+    compileOnly 'org.incendo:cloud-annotations:2.0.0-rc.2'
+    compileOnly 'org.incendo:cloud-minecraft-extras:2.0.0-beta.8'
+    implementation 'com.google.guava:guava:32.1.2-jre'
+    implementation 'io.github.bananapuncher714:nbteditor:7.19.5'
+    implementation 'de.themoep:inventorygui:1.4.3-SNAPSHOT'
+}
+
+def targetJavaVersion = 21
+java {
+    def javaVersion = JavaVersion.toVersion(targetJavaVersion)
+    sourceCompatibility = javaVersion
+    targetCompatibility = javaVersion
+    if (JavaVersion.current() < javaVersion) {
+        toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
+        options.release = targetJavaVersion
+    }
+}
+
+processResources {
+    def props = [version: version]
+    inputs.properties props
+    filteringCharset 'UTF-8'
+    filesMatching('plugin.yml') {
+        expand props
+    }
+}
+
+shadowJar {
+    relocate("org.incendo.cloud", "com.bergerkiller.bukkit.common.dep.cloud")
+    relocate("io.leangen.geantyref", "com.bergerkiller.bukkit.common.dep.typetoken")
+    relocate("me.lucko.commodore", "com.bergerkiller.bukkit.common.dep.me.lucko.commodore")
+    relocate("net.kyori", "com.bergerkiller.bukkit.common.dep.net.kyori")
+    relocate("de.themoep", "dev.phoenix616.inventorygui")
+}
