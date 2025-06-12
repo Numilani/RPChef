@@ -75,9 +75,12 @@ public final class RpChef extends JavaPlugin {
     List<String> brothLore = new ArrayList<String>();
     brothLore.add("A gross broth!");
     brothLore.add("It's mostly muddy water.");
-    cfgFile.set("data.ingredients.Gross Broth.name", "Gross Broth");
-    cfgFile.set("data.ingredients.Gross Broth.type", "WATER_BUCKET");
-    cfgFile.set("data.ingredients.Gross Broth.lore", brothLore);
+    // cfgFile.set("data.ingredients.Gross Broth.name", "Gross Broth");
+    // cfgFile.set("data.ingredients.Gross Broth.type", "WATER_BUCKET");
+    // cfgFile.set("data.ingredients.Gross Broth.lore", brothLore);
+    
+    var broth = new Ingredient("Gross Broth", "WATER_BUCKET", brothLore);
+    cfgFile.set("data.ingredients.Gross Broth", broth.toMap());
 
     cfgFile.saveSync();
   }

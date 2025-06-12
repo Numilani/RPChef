@@ -31,6 +31,9 @@ repositories {
   maven {
     url = 'https://repo.minebench.de/'
   }
+  maven {
+    url = "https://repo.papermc.io/repository/maven-public/"
+  }
 }
 
 dependencies {
@@ -45,6 +48,11 @@ dependencies {
     implementation 'com.google.guava:guava:32.1.2-jre'
     implementation 'io.github.bananapuncher714:nbteditor:7.19.5'
     implementation 'de.themoep:inventorygui:1.4.3-SNAPSHOT'
+
+    testImplementation(platform('org.junit:junit-bom:5.13.1'))
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testImplementation 'org.mockbukkit.mockbukkit:mockbukkit-v1.21:4.50.0'
 }
 
 def targetJavaVersion = 21
@@ -61,6 +69,13 @@ tasks.withType(JavaCompile).configureEach {
     if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
         options.release = targetJavaVersion
     }
+}
+
+test {
+  useJUnitPlatform()
+  testLogging {
+    events "passed", "skipped", "failed"
+  }
 }
 
 processResources {
