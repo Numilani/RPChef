@@ -3,6 +3,8 @@ package me.numilani.rpchef;
 import com.bergerkiller.bukkit.common.config.FileConfiguration;
 
 import me.numilani.rpchef.commands.CookingCommandHandler;
+
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.incendo.cloud.annotations.AnnotationParser;
@@ -11,6 +13,8 @@ import org.incendo.cloud.meta.SimpleCommandMeta;
 import org.incendo.cloud.paper.LegacyPaperCommandManager;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
 
 public final class RpChef extends JavaPlugin {
 
@@ -19,15 +23,14 @@ public final class RpChef extends JavaPlugin {
   public AnnotationParser<CommandSender> cmdParser;
   public FileConfiguration cfg;
   public List<Ingredient> ingredients = new ArrayList<Ingredient>();
-  public List<BaseRecipe> baseRecipes = new ArrayList<BaseRecipe>();
+  public List<BaseRecipe> recipes = new ArrayList<BaseRecipe>();
 
-
-  public static void Main(String[] args){
-    System.out.println("test");
-  }
+  private Logger log;
 
   @Override
   public void onEnable() {
+    log = Bukkit.getLogger();
+    log.info("Starting RpChef...");
 
     try {
       cmdHandler = LegacyPaperCommandManager.createNative(this, ExecutionCoordinator.simpleCoordinator());
@@ -41,48 +44,62 @@ public final class RpChef extends JavaPlugin {
     var isFirstRun = false;
     if (!(new FileConfiguration(this, "rpchef.yml").exists())) {
       isFirstRun = true;
+      log.info("Generating fresh config file...");
       doPluginInit();
     }
 
-    cfg = new FileConfiguration(this, "rpchef.yml");
-    cfg.load();
+    cfg = loadConfig();
 
     cmdParser.parse(new CookingCommandHandler(this));
 
     // Register events
-    // getServer().getPluginManager().registerEvents(new FastRpChatListeners(this), this);
+    // getServer().getPluginManager().registerEvents(new FastRpChatListeners(this),
+    // this);
 
- }
+    log.info("RpChef loading complete!");
+  }
 
   private void doPluginInit() {
     var cfgFile = new FileConfiguration(this, "rpchef.yml");
+    // set config flags
     cfgFile.set("allow-ingredient-registration-command", true);
-    cfgFile.set("data.recipetypes.exampletype.suffix", "Monsterstew");
-    List<String> reqIngredientList = new ArrayList<String>();
-    reqIngredientList.add("Monster Meat");
-    reqIngredientList.add("Gnats");
-    reqIngredientList.add("Gross Broth");
-    cfgFile.set("data.recipetypes.exampletype.requredIngredients", reqIngredientList);
-    cfgFile.set("data.recipetypes.exampletype.result.type", "Carrot");
-    cfgFile.set("data.recipetypes.exampletype.result.initiallore", "This disgusting abomination is a 'monsterstew'.");
 
-    cfgFile.set("data.ingredients.Monster Meat.name", "Monster Meat");
-    cfgFile.set("data.ingredients.Monster Meat.type", "ROTTEN_FLESH");
-    
-    cfgFile.set("data.ingredients.Gnats.name", "Gnats");
-    cfgFile.set("data.ingredients.Gnats.type", "GUNPOWDER");
+    // add sample ingredients
+    var broth = new Ingredient("Gross Broth", "WATER_BUCKET", List.of("A gross broth!", "It's mostly muddy water."));
+    var monsterMeat = new Ingredient("Monster Meat", "ROTTEN_FLESH");
+    var gnats = new Ingredient("Gnats", "GUNPOWDER");
 
-    List<String> brothLore = new ArrayList<String>();
-    brothLore.add("A gross broth!");
-    brothLore.add("It's mostly muddy water.");
-    // cfgFile.set("data.ingredients.Gross Broth.name", "Gross Broth");
-    // cfgFile.set("data.ingredients.Gross Broth.type", "WATER_BUCKET");
-    // cfgFile.set("data.ingredients.Gross Broth.lore", brothLore);
-    
-    var broth = new Ingredient("Gross Broth", "WATER_BUCKET", brothLore);
     cfgFile.set("data.ingredients.Gross Broth", broth.toMap());
+    cfgFile.set("data.ingredients.Monster Meat", monsterMeat.toMap());
+    cfgFile.set("data.ingredients.Gnats", gnats.toMap());
 
+    // add sample recipes
+    var exampleRecipe = new BaseRecipe("Monster Stew", "SUSPICIOUS_STEW", Map.of(broth, 1, monsterMeat,1, gnats,1),
+        Map.of(gnats, 2, monsterMeat, 4));
+
+    cfgFile.set("data.recipes.examplerecipe", exampleRecipe.toMap());
+
+    // baseRecipes.add(exampleRecipe);
+
+    // save everything
     cfgFile.saveSync();
+  }
+
+  private FileConfiguration loadConfig() {
+    var cfg = new FileConfiguration(this, "rpchef.yml");
+    cfg.load();
+
+    for (var node : cfg.getNodeList("data.ingredients")) {
+      ingredients.add(Ingredient.fromMap(node.getValues()));
+    }
+    log.info(ingredients.size() + " ingredients loaded");
+
+    for (var node : cfg.getNodeList("data.recipes")) {
+      recipes.add(BaseRecipe.fromMap(node.getValues(), ingredients));
+    }
+    log.info(recipes.size() + " recipes loaded");
+
+    return cfg;
   }
 
   @Override

@@ -78,6 +78,8 @@ public class CookingCommandHandler {
     gui.show((HumanEntity) sender);
   }
 
+// public void CreateResult(List<Ingredient> bases, Map<Ingredient, Integer> additionals)
+
   @Command("rpchef saveingredient")
   public void SaveIngredient(CommandSender sender) {
     Player p = (Player) sender;

@@ -59,9 +59,9 @@ public class Ingredient {
     String name = (String) map.get("name");
     String itemType = (String) map.get("itemType");
     String foodTypeTag = (String) map.get("foodTypeTag");
-    List<String> loreLines = (ArrayList<String>) map.get("loreLines");
-    List<String> adjectives = (ArrayList<String>) map.get("adjectives");
-    List<String> descriptiveSentences = (ArrayList<String>) map.get("descriptiveSentences");
+    List<String> loreLines = new ArrayList<>((List<String>) map.get("loreLines"));
+    List<String> adjectives = new ArrayList<>((List<String>) map.get("adjectives"));
+    List<String> descriptiveSentences = new ArrayList<>((List<String>) map.get("descriptiveSentences"));
     return new Ingredient(name, itemType, foodTypeTag, loreLines, adjectives, descriptiveSentences);
   }
 
