@@ -3,6 +3,7 @@ package me.numilani.rpchef;
 import com.bergerkiller.bukkit.common.config.FileConfiguration;
 
 import me.numilani.rpchef.commands.CookingCommandHandler;
+import me.numilani.rpchef.services.CookingService;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -22,8 +23,11 @@ public final class RpChef extends JavaPlugin {
   public LegacyPaperCommandManager<CommandSender> cmdHandler;
   public AnnotationParser<CommandSender> cmdParser;
   public FileConfiguration cfg;
+  
   public List<Ingredient> ingredients = new ArrayList<Ingredient>();
   public List<BaseRecipe> recipes = new ArrayList<BaseRecipe>();
+
+  public CookingService cookingService = new CookingService(this);
 
   private Logger log;
 
@@ -75,7 +79,7 @@ public final class RpChef extends JavaPlugin {
 
     // add sample recipes
     var exampleRecipe = new BaseRecipe("Monster Stew", "SUSPICIOUS_STEW", Map.of(broth, 1, monsterMeat,1, gnats,1),
-        Map.of(gnats, 2, monsterMeat, 4));
+        Map.of());
 
     cfgFile.set("data.recipes.examplerecipe", exampleRecipe.toMap());
 

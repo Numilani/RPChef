@@ -1,5 +1,6 @@
 package me.numilani.rpchef.commands;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.bukkit.Bukkit;
@@ -23,6 +24,7 @@ import me.numilani.rpchef.RpChef;
 public class CookingCommandHandler {
   private RpChef plugin;
 
+  String redrawState = "default";
   public CookingCommandHandler(RpChef plugin) {
     this.plugin = plugin;
   }
@@ -52,13 +54,30 @@ public class CookingCommandHandler {
     Inventory resultInventory = Bukkit.createInventory(null, InventoryType.CHEST);
     gui.addElement(new GuiStorageElement('d', resultInventory));
 
-    gui.addElement(new GuiStateElement('c', "default",
+
+    var stateBtn = new GuiStateElement('c', "default",
         new GuiStateElement.State(change -> {
-        }, "default", new ItemStack(Material.WHITE_WOOL, 1), ""),
+          var baseItems = plugin.cookingService.getIngredientsFromItems(
+              Arrays.asList(definingItemsInventory.getContents()));
+          var additionalItems = plugin.cookingService.getIngredientsFromItems(
+              Arrays.asList(recipeItemsInventory.getContents()));
+
+          var recipe = plugin.cookingService.findRecipeFromIngredients(baseItems, additionalItems);
+          if (!recipe.isEmpty()) {
+            resultInventory.addItem(plugin.cookingService.createResult(recipe.get()));
+            redrawState = "recipe_success";
+          }
+        else redrawState = "recipe_failure";
+
+        }, "default", new ItemStack(Material.WHITE_WOOL, 1), "Cook Recipe"),
         new GuiStateElement.State(change -> {
+          redrawState = "default";
         }, "recipe_success", new ItemStack(Material.GREEN_WOOL, 1), ""),
         new GuiStateElement.State(change -> {
-        }, "recipe_failure", new ItemStack(Material.RED_WOOL, 1), "")));
+        redrawState = "default";
+        }, "recipe_failure", new ItemStack(Material.RED_WOOL, 1), ""));
+
+    gui.addElement(stateBtn);
 
     gui.addElement(new StaticGuiElement('r', new ItemStack(Material.RED_STAINED_GLASS_PANE, 1)));
     gui.addElement(new StaticGuiElement('o', new ItemStack(Material.ORANGE_STAINED_GLASS_PANE, 1)));
@@ -66,19 +85,32 @@ public class CookingCommandHandler {
 
     // adds items back to player inventory on close
     gui.setCloseAction(close -> {
+      redrawState = "default";
       gui.getElements().forEach(x -> {
         if (x instanceof GuiStorageElement) {
           ((GuiStorageElement) x).getStorage().forEach(y -> {
-            p.getInventory().addItem(y);
+            if (y != null) {
+              p.getInventory().addItem(y);
+            }
           });
         }
       });
       return false;
     });
+
+    var baseItems = plugin.cookingService.getIngredientsFromItems(
+        Arrays.asList(definingItemsInventory.getContents()));
+    var additionalItems = plugin.cookingService.getIngredientsFromItems(
+        Arrays.asList(recipeItemsInventory.getContents()));
+
+    var recipe = plugin.cookingService.findRecipeFromIngredients(baseItems, additionalItems);
+    if (!recipe.isEmpty()) {
+      resultInventory.addItem(plugin.cookingService.createResult(recipe.get()));
+    }
+
+    stateBtn.setState(redrawState);
     gui.show((HumanEntity) sender);
   }
-
-// public void CreateResult(List<Ingredient> bases, Map<Ingredient, Integer> additionals)
 
   @Command("rpchef saveingredient")
   public void SaveIngredient(CommandSender sender) {
