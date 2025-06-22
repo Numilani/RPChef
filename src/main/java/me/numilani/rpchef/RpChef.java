@@ -69,9 +69,9 @@ public final class RpChef extends JavaPlugin {
     cfgFile.set("allow-ingredient-registration-command", true);
 
     // add sample ingredients
-    var broth = new Ingredient("Gross Broth", "WATER_BUCKET", List.of("A gross broth!", "It's mostly muddy water."));
-    var monsterMeat = new Ingredient("Monster Meat", "ROTTEN_FLESH");
-    var gnats = new Ingredient("Gnats", "GUNPOWDER");
+    var broth = new Ingredient("Gross Broth", "WATER_BUCKET", List.of("A gross broth!", "It's mostly muddy water."), List.of("Murky", "Hazy"), List.of("The broth is full of mud and sand."));
+    var monsterMeat = new Ingredient("Monster Meat", "ROTTEN_FLESH", List.of(), List.of("Stringy", "Foul"), List.of("The meat is rancid."));
+    var gnats = new Ingredient("Gnats", "GUNPOWDER", List.of(), List.of("Gritty", "Chunky"), List.of("There are odd flecks of...something in here."));
 
     cfgFile.set("data.ingredients.Gross Broth", broth.toMap());
     cfgFile.set("data.ingredients.Monster Meat", monsterMeat.toMap());
@@ -80,6 +80,7 @@ public final class RpChef extends JavaPlugin {
     // add sample recipes
     var exampleRecipe = new BaseRecipe("Monster Stew", "SUSPICIOUS_STEW", Map.of(broth, 1, monsterMeat,1, gnats,1),
         Map.of());
+    exampleRecipe.descriptiveStarters = List.of("It's a revolting stew.");
 
     cfgFile.set("data.recipes.examplerecipe", exampleRecipe.toMap());
 

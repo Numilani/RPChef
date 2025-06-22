@@ -1,5 +1,7 @@
 package me.numilani.rpchef.services;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -25,7 +27,7 @@ public class CookingService {
 
   public Map<Ingredient, Integer> getIngredientsFromItems(List<ItemStack> items) {
 
-    Map<Ingredient, Integer> rv = Map.of();
+    HashMap<Ingredient, Integer> rv = new HashMap<Ingredient, Integer>();
 
     for (var i : items) {
       if (i == null) continue;
@@ -77,8 +79,8 @@ public class CookingService {
   }
 
   public ItemStack createResult(BaseRecipe recipe) {
-    List<String> adjectives = List.of();
-    List<String> descriptiveSentences = List.of();
+    List<String> adjectives = new ArrayList<String>();
+    List<String> descriptiveSentences = new ArrayList<String>();
 
     for (var i : recipe.baseIngredients.entrySet()) {
       for (int x = i.getValue(); x > 0; x--) {
